@@ -37,7 +37,11 @@ export async function loginUser(credentials: { email: string; password: string }
 }
 
 export async function authFetch(url: string, options: RequestInit = {}) {
-  const token = localStorage.getItem('authToken');
+  let token = null;
+  if (typeof window !== 'undefined') {
+    token = localStorage.getItem('authToken');
+  }
+
   const headers = new Headers(options.headers);
   
   if (!(options.body instanceof FormData) && !headers.has('Content-Type')) {
