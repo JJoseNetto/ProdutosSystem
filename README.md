@@ -7,6 +7,7 @@ Um **projeto frontend** feito com **Next.js** e **HeroUI**, que inclui:
 * Gráficos com **Chart.js** 📊
 * Dados mockados para demonstração 📝
 * Gerenciamento de estado com **Zustand** 🏗️
+* Validação de formulários com **Zod** ✅
 * Ícones com **Heroicons** ✨
 
 Este projeto foi desenvolvido com foco em **boa arquitetura, design moderno e usabilidade**.
@@ -21,13 +22,14 @@ Este projeto foi desenvolvido com foco em **boa arquitetura, design moderno e us
 * [Heroicons](https://heroicons.com/)
 * [Chart.js](https://www.chartjs.org/)
 * [Zustand](https://zustand-demo.pmnd.rs/)
+* [Zod](https://zod.dev/)
 * CSS moderno com Tailwind (via HeroUI)
 
 ---
 
 ## ⚡ Funcionalidades
 
-* ✅ Cadastro de usuários
+* ✅ Cadastro de usuários com validação Zod
 * ✅ Login e autenticação
 * ✅ CRUD completo de produtos (Create, Read, Update, Delete)
 * ✅ Visualização de gráficos com dados mockados
