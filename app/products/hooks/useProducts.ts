@@ -12,7 +12,7 @@ export const useProducts = () => {
       setLoading(true);
       const response = await authFetch("/products", { method: "GET" });
       const data = await response.json();
-      setProducts(data.data);
+      setProducts(Array.isArray(data.data) ? data.data : []);
       setError(null);
     } catch (err) {
       console.error(err);

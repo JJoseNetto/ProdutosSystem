@@ -3,7 +3,11 @@ import { Product } from "@/types/Product";
 
 export const useProductFilters = (products: Product[], search: string, statusFilter: string) => {
   const filteredProducts = useMemo(() => {
-    return products.filter((p) => {
+    const list = Array.isArray(products) ? products : [];;
+
+    return list.filter((p) => {
+
+       if (!p) return false;
       const matchesSearch =
         p.title.toLowerCase().includes(search.toLowerCase()) ||
         p.description.toLowerCase().includes(search.toLowerCase());

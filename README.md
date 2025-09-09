@@ -55,10 +55,10 @@ npm install
 yarn install
 ```
 
-3. Configure as variáveis de ambiente no arquivo `.env.local`:
+3. Configure as variáveis de ambiente no arquivo `.env`:
 
 ```env
-NEXT_PUBLIC_API_BASE_URL=https://api-teste-front-production.up.railway.app
+NEXT_PUBLIC_API_BASE_URL=API EM USO
 ```
 
 4. Rode o projeto em modo de desenvolvimento:
