@@ -70,8 +70,16 @@ export default function ModalProduct({ isOpen, onClose, onProductCreated }: Moda
       onProductCreated();
       onClose();
       reset();
-    } catch (err) {
-      handleApiError(err);
+    } catch (err: any) {
+       if (err.code === "ATH_0001") {
+          addToast({
+            title: "Autenticação necessária",
+            description: "Faça login novamente para continuar.",
+            color: "warning",
+          });
+      } else {
+        handleApiError(err);
+      }
     } finally {
       setIsSubmitting(false);
     }

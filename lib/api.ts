@@ -42,7 +42,8 @@ export async function authFetch(url: string, options: RequestInit = {}) {
 
   if (typeof window !== 'undefined') {
     try {
-      token = localStorage.getItem('authToken');
+      const stored = localStorage.getItem('auth-storage');
+      token = stored ? JSON.parse(stored)?.token : null;
     } catch {
       token = null;
     }
@@ -65,8 +66,11 @@ export async function authFetch(url: string, options: RequestInit = {}) {
     });
 
     if (response.status === 401 && typeof window !== 'undefined') {
-      localStorage.removeItem('authToken');
+      localStorage.removeItem('auth-storage');
       window.dispatchEvent(new Event('unauthorized'));
+      const error = new Error("ATH_0001: Token de autenticação não encontrado. Faça login novamente.");
+      (error as any).code = "ATH_0001";
+      throw error;
     }
 
     return response;
