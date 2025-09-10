@@ -11,6 +11,8 @@ import {
   addToast,
 } from "@heroui/react";
 import { Product } from "@/types/Product";
+import { useState } from "react";
+import { handleApiError, throwApiError } from "@/utils/errorHandler";
 
 interface ModalDeleteProductProps {
   isOpen: boolean;
@@ -19,38 +21,39 @@ interface ModalDeleteProductProps {
   product: Product | null;
 }
 
-export default function ModalDeleteProduct({ 
-  isOpen, 
-  onClose, 
-  onProductCreated, 
-  product 
+export default function ModalDeleteProduct({
+  isOpen,
+  onClose,
+  onProductCreated,
+  product
 }: ModalDeleteProductProps) {
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!product) return;
+
+    setIsSubmitting(true);
+
     try {
-        if (!product) return;
-
-        await authFetch(`/products/${product.id}`, {
-            method: "DELETE",
-        });
-
-        onProductCreated();
-        onClose();
-
-        addToast({
-          title: "Produto deletado!",
-          description: `O produto "${product.title}" foi removido com sucesso.`,
-          color: "success", 
-        });
-
-    } catch (err: any) {
-      console.error("Erro ao deletar produto:", err);
-      addToast({
-        title: "Erro",
-        description: "Não foi possível deletar o produto.",
-        color: "danger",
+      const response = await authFetch(`/products/${product.id}`, {
+        method: "DELETE",
       });
+
+      if (!response.ok) throwApiError(response);
+
+      addToast({
+        title: "Produto deletado!",
+        description: `O produto "${product.title}" foi removido com sucesso.`,
+        color: "success",
+      });
+
+      onProductCreated();
+      onClose();
+    } catch (err) {
+      handleApiError(err);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -68,11 +71,18 @@ export default function ModalDeleteProduct({
         <ModalBody className="flex flex-col gap-4">
           <form onSubmit={onSubmit}>
             <p>Deseja mesmo deletar o produto: {product?.title}?</p>
+
             <ModalFooter className="flex justify-end gap-2 mt-4">
-              <Button color="primary" type="submit">
+              <Button color="primary" type="submit" disabled={isSubmitting}>
                 Sim
               </Button>
-              <Button color="danger" variant="flat" onPress={onClose} type="button">
+              <Button
+                color="danger"
+                variant="flat"
+                onPress={onClose}
+                type="button"
+                disabled={isSubmitting}
+              >
                 Não
               </Button>
             </ModalFooter>

@@ -121,7 +121,6 @@ export default function TabelaProducts() {
           <TableBody 
             items={filteredProducts} 
             loadingState={loading ? "loading" : "idle"}
-            loadingContent={"Carregando..."}
             emptyContent={error ? error : "Nenhum produto cadastrado"}
           >
             {(item) => (

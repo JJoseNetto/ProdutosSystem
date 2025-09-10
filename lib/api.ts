@@ -38,34 +38,40 @@ export async function loginUser(credentials: { email: string; password: string }
 }
 
 export async function authFetch(url: string, options: RequestInit = {}) {
-  let token = null;
-  
+  let token: string | null = null;
+
   if (typeof window !== 'undefined') {
-    const state = useAuthStore.getState();
-    token = state.token;
-    console.log('🔐 Token do Zustand:', token);
+    try {
+      token = localStorage.getItem('authToken');
+    } catch {
+      token = null;
+    }
   }
 
   const headers = new Headers(options.headers);
-  
+
   if (!(options.body instanceof FormData) && !headers.has('Content-Type')) {
     headers.set('Content-Type', 'application/json');
   }
-  
+
   if (token) {
     headers.set('Authorization', `Bearer ${token}`);
   }
 
-  const response = await fetch(`${API_BASE_URL}${url}`, {
-    ...options,
-    headers,
-  });
+  try {
+    const response = await fetch(`${API_BASE_URL}${url}`, {
+      ...options,
+      headers,
+    });
 
-  if (response.status === 401) {
-    if (typeof window !== 'undefined') {
-      useAuthStore.getState().logout();
+    if (response.status === 401 && typeof window !== 'undefined') {
+      localStorage.removeItem('authToken');
+      window.dispatchEvent(new Event('unauthorized'));
     }
-  }
 
-  return response;
+    return response;
+  } catch (error) {
+    console.error('API Request failed:', error);
+    throw error;
+  }
 }

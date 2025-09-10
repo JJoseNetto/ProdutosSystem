@@ -1,8 +1,7 @@
 "use client";
 
-import { z } from "zod";
 import { authFetch } from "@/lib/api";
-import { UpdateProductSchema } from "@/lib/validation";
+import { UpdateProductFormData, UpdateProductSchema } from "@/lib/validation";
 import {
   Modal,
   ModalContent,
@@ -18,6 +17,7 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Product } from "@/types/Product";
+import { handleApiError, throwApiError } from "@/utils/errorHandler";
 
 interface ModalEditProductProps {
   isOpen: boolean;
@@ -26,22 +26,26 @@ interface ModalEditProductProps {
   product: Product | null;
 }
 
-export default function ModalEditProduct({ 
-  isOpen, 
-  onClose, 
-  onProductCreated, 
-  product 
+export default function ModalEditProduct({
+  isOpen,
+  onClose,
+  onProductCreated,
+  product
 }: ModalEditProductProps) {
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isStatusChecked, setIsStatusChecked] = useState(true);
-  
-  const { register, handleSubmit, clearErrors, formState: { errors }, reset, setValue} = useForm<z.infer<typeof UpdateProductSchema>>({
+
+  const { register, handleSubmit, setValue, reset, clearErrors, formState: { errors } } = useForm<UpdateProductFormData>({
     resolver: zodResolver(UpdateProductSchema),
-    defaultValues: { 
-      title: "", 
-      description: "", 
-      status: true 
-    },
+    defaultValues: { title: "", description: "", status: true }
   });
+
+  useEffect(() => {
+    if (!isOpen) {
+      reset();
+      clearErrors();
+    }
+  }, [isOpen, reset, clearErrors]);
 
   useEffect(() => {
     if (product) {
@@ -57,10 +61,12 @@ export default function ModalEditProduct({
     setValue("status", checked, { shouldValidate: true });
   };
 
-  const onSubmit = async (data: z.infer<typeof UpdateProductSchema>) => {
-    try {
-      if (!product) return;
+  const onSubmit = async (data: UpdateProductFormData) => {
+    if (!product) return;
 
+    setIsSubmitting(true);
+
+    try {
       const requestBody = JSON.stringify({
         title: data.title,
         description: data.description,
@@ -69,32 +75,24 @@ export default function ModalEditProduct({
 
       const response = await authFetch(`/products/${product.id}`, {
         method: "PUT",
-        body: requestBody,
+        body: requestBody
       });
 
-      if (!response.ok) {
-        addToast({
-            title: "Error!",
-            description: "Erro ao editar o produto",
-            color: "success", 
-        });
-        return;
-      }
+      if (!response.ok) throwApiError(response);
 
-        addToast({
-            title: "Produto editado!",
-            description: `O produto foi editado com sucesso.`,
-            color: "success", 
-        });
+      addToast({
+        title: "Produto editado!",
+        description: `O produto "${data.title}" foi atualizado com sucesso.`,
+        color: "success"
+      });
 
       onProductCreated();
       onClose();
-    } catch (err: any) {
-      addToast({
-        title: "Error ao criar o produto!",
-        description: `${err}`,
-        color: "success", 
-      });
+      reset();
+    } catch (err) {
+      handleApiError(err);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -106,7 +104,7 @@ export default function ModalEditProduct({
     >
       <ModalContent>
         <ModalHeader className="flex flex-col gap-1">
-          Editar Produto {product?.title ? `- ${product.title}` : ''}
+          Editar Produto {product?.title ? `- ${product.title}` : ""}
         </ModalHeader>
 
         <ModalBody className="flex flex-col gap-4">
@@ -117,7 +115,7 @@ export default function ModalEditProduct({
               {...register("title")}
               variant="bordered"
               isInvalid={!!errors.title}
-              errorMessage={errors.title?.message ? errors.title.message : undefined}
+              errorMessage={errors.title?.message}
             />
 
             <Input
@@ -126,11 +124,11 @@ export default function ModalEditProduct({
               {...register("description")}
               variant="bordered"
               isInvalid={!!errors.description}
-              errorMessage={errors.description?.message ? errors.description.message : undefined}
+              errorMessage={errors.description?.message}
             />
 
             <div className="flex items-center">
-              <Switch 
+              <Switch
                 isSelected={isStatusChecked}
                 onValueChange={handleStatusChange}
               />
@@ -140,10 +138,16 @@ export default function ModalEditProduct({
             <input type="hidden" {...register("status")} />
 
             <ModalFooter className="flex justify-end gap-2 mt-4">
-              <Button color="danger" variant="flat" onPress={onClose} type="button">
+              <Button
+                color="danger"
+                variant="flat"
+                onPress={onClose}
+                type="button"
+                disabled={isSubmitting}
+              >
                 Fechar
               </Button>
-              <Button color="primary" type="submit">
+              <Button color="primary" type="submit" disabled={isSubmitting}>
                 Salvar Alterações
               </Button>
             </ModalFooter>

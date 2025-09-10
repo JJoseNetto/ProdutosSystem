@@ -1,8 +1,7 @@
 "use client";
 
-import { z } from "zod";
 import { authFetch } from "@/lib/api";
-import { CreateProductSchema } from "@/lib/validation";
+import { CreateProductFormData, CreateProductSchema } from "@/lib/validation";
 import {
   Modal,
   ModalContent,
@@ -13,9 +12,10 @@ import {
   Input,
   addToast
 } from "@heroui/react";
-import { useRef, useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { handleApiError, throwApiError } from "@/utils/errorHandler";
 
 interface ModalProductProps {
   isOpen: boolean;
@@ -24,9 +24,10 @@ interface ModalProductProps {
 }
 
 export default function ModalProduct({ isOpen, onClose, onProductCreated }: ModalProductProps) {
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  const { register, handleSubmit, clearErrors, formState: { errors }, reset, setValue } = useForm<z.infer<typeof CreateProductSchema>>({
+  const { register, handleSubmit, clearErrors, formState: { errors }, reset, setValue } = useForm<CreateProductFormData>({
     resolver: zodResolver(CreateProductSchema),
     defaultValues: { title: "", description: "", thumbnail: undefined },
   });
@@ -35,56 +36,62 @@ export default function ModalProduct({ isOpen, onClose, onProductCreated }: Moda
     if (!isOpen) {
       reset();
       clearErrors();
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
-      }
     }
   }, [isOpen, reset, clearErrors]);
 
-  const onSubmit = async (data: z.infer<typeof CreateProductSchema>) => {
+  const onSubmit = async (data: CreateProductFormData) => {
+    if (!data.thumbnail) {
+      addToast({
+        title: "Erro",
+        description: "O arquivo de thumbnail é obrigatório",
+        color: "warning",
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+
     try {
       const formData = new FormData();
       formData.append("title", data.title);
       formData.append("description", data.description);
       formData.append("thumbnail", data.thumbnail);
 
-      const response = await authFetch("/products", {
-        method: "POST",
-        body: formData,
+      const response = await authFetch("/products", { method: "POST", body: formData });
+
+      if (!response.ok) throwApiError(response);
+
+      addToast({
+        title: "Produto criado!",
+        description: `O produto "${data.title}" foi criado com sucesso.`,
+        color: "success",
       });
-
-      if(!response.ok) {
-        addToast({
-          title: "Error!",
-          description: "Erro ao criar o produto!",
-          color: "success", 
-        });
-      }
-
-        addToast({
-          title: "Produto criado!",
-          description: `O produto "${data.title}" foi criado com sucesso.`,
-          color: "success", 
-        });
 
       onProductCreated();
-
       onClose();
-    } catch (err: any) {
-      addToast({
-        title: "Error ao criar o produto!",
-        description: `${err}`,
-        color: "success", 
-      });
+      reset();
+    } catch (err) {
+      handleApiError(err);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      clearErrors("thumbnail");
-      setValue("thumbnail", file); 
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      addToast({ title: "Erro", description: "Somente imagens são permitidas.", color: "warning" });
+      return;
     }
+    if (file.size > 5 * 1024 * 1024) {
+      addToast({ title: "Erro", description: "O arquivo deve ter no máximo 5MB.", color: "warning" });
+      return;
+    }
+
+    clearErrors("thumbnail");
+    setValue("thumbnail", file);
   };
 
   return (
@@ -135,10 +142,10 @@ export default function ModalProduct({ isOpen, onClose, onProductCreated }: Moda
             </div>
 
             <ModalFooter className="flex justify-end gap-2 mt-4">
-              <Button color="danger" variant="flat" onPress={onClose} type="button">
+              <Button color="danger" variant="flat" onPress={onClose} type="button" disabled={isSubmitting}>
                 Fechar
               </Button>
-              <Button color="primary" type="submit">
+              <Button color="primary" type="submit" disabled={isSubmitting}>
                 Salvar
               </Button>
             </ModalFooter>

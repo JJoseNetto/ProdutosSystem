@@ -47,5 +47,5 @@ export const UpdateProductSchema = z.object({
 
 export type LoginFormData = z.infer<typeof loginSchema>;
 export type RegisterFormData = z.infer<typeof RegisterSchema>;
-export type CreateProductSchema = z.infer<typeof CreateProductSchema>;
+export type CreateProductFormData = z.infer<typeof CreateProductSchema>;
 export type UpdateProductFormData = z.infer<typeof UpdateProductSchema>;
