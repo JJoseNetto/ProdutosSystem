@@ -1,3 +1,4 @@
+import { useAuthStore } from "@/store/authStore";
 import { RegisterFormData } from "./validation";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
@@ -38,8 +39,11 @@ export async function loginUser(credentials: { email: string; password: string }
 
 export async function authFetch(url: string, options: RequestInit = {}) {
   let token = null;
+  
   if (typeof window !== 'undefined') {
-    token = localStorage.getItem('authToken');
+    const state = useAuthStore.getState();
+    token = state.token;
+    console.log('🔐 Token do Zustand:', token);
   }
 
   const headers = new Headers(options.headers);
@@ -52,8 +56,16 @@ export async function authFetch(url: string, options: RequestInit = {}) {
     headers.set('Authorization', `Bearer ${token}`);
   }
 
-  return fetch(`${API_BASE_URL}${url}`, {
+  const response = await fetch(`${API_BASE_URL}${url}`, {
     ...options,
     headers,
   });
+
+  if (response.status === 401) {
+    if (typeof window !== 'undefined') {
+      useAuthStore.getState().logout();
+    }
+  }
+
+  return response;
 }

@@ -35,7 +35,7 @@ ChartJS.register(
   Legend
 );
 
-export default function DashboardProducts() {
+export default function Dashboard() {
   const { token, isLoading } = useRequireAuth("/");
   const [sidebarOpen, setSidebarOpen] = useState(true);
 

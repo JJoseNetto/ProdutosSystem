@@ -1,9 +1,9 @@
-import  DashboardProducts  from "./dashboardProductsPage";
+import  Dashboard  from "./dashboardPage";
 
 export default function DashboardPage() {
   return (
     <div className="flex">
-        <DashboardProducts/>
+        <Dashboard/>
     </div>
   )
 }
