@@ -43,7 +43,10 @@ export async function authFetch(url: string, options: RequestInit = {}) {
   if (typeof window !== 'undefined') {
     try {
       const stored = localStorage.getItem('auth-storage');
-      token = stored ? JSON.parse(stored)?.token : null;
+      if (stored) {
+        const authState = JSON.parse(stored);
+        token = authState?.state?.token || null;
+      }
     } catch {
       token = null;
     }
@@ -65,12 +68,19 @@ export async function authFetch(url: string, options: RequestInit = {}) {
       headers,
     });
 
-    if (response.status === 401 && typeof window !== 'undefined') {
-      localStorage.removeItem('auth-storage');
-      window.dispatchEvent(new Event('unauthorized'));
-      const error = new Error("ATH_0001: Token de autenticação não encontrado. Faça login novamente.");
+    if (response.status === 401) {
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('auth-storage');
+        window.dispatchEvent(new Event('unauthorized'));
+      }
+      const error = new Error("Token de autenticação inválido ou expirado. Faça login novamente.");
       (error as any).code = "ATH_0001";
       throw error;
+    }
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || 'Request failed');
     }
 
     return response;
