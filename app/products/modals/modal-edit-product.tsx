@@ -96,8 +96,6 @@ export default function ModalEditProduct({
     }
   };
 
-  const currentValues = watch();
-
   return (
     <Modal
       isOpen={isOpen}
