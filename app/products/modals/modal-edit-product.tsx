@@ -48,13 +48,13 @@ export default function ModalEditProduct({
   }, [isOpen, reset, clearErrors]);
 
   useEffect(() => {
-    if (product) {
+    if (isOpen && product) {
       setValue("title", product.title);
       setValue("description", product.description);
       setValue("status", product.status);
       setIsStatusChecked(product.status);
     }
-  }, [product, setValue]);
+  }, [isOpen, product, setValue]);
 
   const handleStatusChange = (checked: boolean) => {
     setIsStatusChecked(checked);
