@@ -35,17 +35,14 @@ export default function ModalEditProduct({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isStatusChecked, setIsStatusChecked] = useState(true);
 
-  const { register, handleSubmit, setValue, reset, clearErrors, formState: { errors } } = useForm<UpdateProductFormData>({
+  const { register, handleSubmit, setValue, reset, clearErrors, formState: { errors }, watch } = useForm<UpdateProductFormData>({
     resolver: zodResolver(UpdateProductSchema),
-    defaultValues: { title: "", description: "", status: true }
-  });
-
-  useEffect(() => {
-    if (!isOpen) {
-      reset();
-      clearErrors();
+    defaultValues: { 
+      title: "", 
+      description: "", 
+      status: true 
     }
-  }, [isOpen, reset, clearErrors]);
+  });
 
   useEffect(() => {
     if (isOpen && product) {
@@ -53,8 +50,12 @@ export default function ModalEditProduct({
       setValue("description", product.description);
       setValue("status", product.status);
       setIsStatusChecked(product.status);
+    } else {
+      reset();
+      clearErrors();
+      setIsStatusChecked(true);
     }
-  }, [isOpen, product, setValue]);
+  }, [isOpen, product, setValue, reset, clearErrors]);
 
   const handleStatusChange = (checked: boolean) => {
     setIsStatusChecked(checked);
@@ -88,13 +89,14 @@ export default function ModalEditProduct({
 
       onProductCreated();
       onClose();
-      reset();
     } catch (err) {
       handleApiError(err);
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  const currentValues = watch();
 
   return (
     <Modal
@@ -116,6 +118,7 @@ export default function ModalEditProduct({
               variant="bordered"
               isInvalid={!!errors.title}
               errorMessage={errors.title?.message}
+              value={watch("title")}
             />
 
             <Input
@@ -125,6 +128,7 @@ export default function ModalEditProduct({
               variant="bordered"
               isInvalid={!!errors.description}
               errorMessage={errors.description?.message}
+              value={watch("description")}
             />
 
             <div className="flex items-center">
