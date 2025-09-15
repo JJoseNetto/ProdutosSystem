@@ -1,13 +1,7 @@
-// import 'server-only';
-// 'use server'
-
-import { RegisterSchema } from "@/lib/validation";
 import {
   createSafeActionClient,
   DEFAULT_SERVER_ERROR_MESSAGE,
 } from "next-safe-action";
-// import { cookies } from 'next/headers';
-// import { headers } from 'next/headers';
 import z from "zod";
 
 export class ActionError extends Error {}
@@ -29,12 +23,11 @@ export const actionClient = createSafeActionClient({
 
     return DEFAULT_SERVER_ERROR_MESSAGE;
   },
-}).use(async ({ next, clientInput, metadata, ctx }) => {
+}).use(async ({ next, ctx }) => {
   // console.log("LOGGING MIDDLEWARE");
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL!;
 
   const headers = await getHeaders();
-  // headers.set("Content-Type", "application/json");
 
   // const startTime = performance.now();
 
