@@ -39,11 +39,11 @@ export const getProducts = authActionClient
       return {
         success: true,
         data,
-        message: "Products fetched successfully",
+        message: "Produtos encontrados com sucesso",
       };
     } catch (error) {
-      console.error("Get products error:", error);
-      throw new ActionError("Failed to fetch products");
+      // console.error("Get products error:", error);
+      throw new ActionError("Falha ao buscar produtos");
     }
   });
 
@@ -54,7 +54,7 @@ export const createProduct = authActionClient
   })
   .inputSchema(CreateProductSchema)
   .action(async ({ ctx, parsedInput }) => {
-    console.log("Creating product with input:", parsedInput);
+    // console.log("Creating product with input:", parsedInput);
 
     const formData = new FormData();
     formData.append("title", parsedInput.title);
@@ -84,11 +84,11 @@ export const createProduct = authActionClient
       return {
         success: true,
         data: responseData,
-        message: "Product created successfully",
+        message: "Produto criado com sucesso",
       };
     } catch (error) {
-      console.error("Create product error:", error);
-      throw new ActionError("Failed to create product");
+      // console.error("Create product error:", error);
+      throw new ActionError("Falha na criação do produto");
     }
   });
 
@@ -121,11 +121,11 @@ export const editProduct = authActionClient
       return {
         success: true,
         data: responseData,
-        message: "Product edited successfully",
+        message: "Produto editado com sucesso",
       };
     } catch (error) {
-      console.error("Edit product error:", error);
-      throw new ActionError("Failed to edit product");
+      // console.error("Edit product error:", error);
+      throw new ActionError("Falha na edição do produto");
     }
   });
 
@@ -152,10 +152,10 @@ export const deleteProduct = authActionClient
 
       return {
         success: true,
-        message: "Product deleted successfully",
+        message: "Produto excluído com sucesso",
       };
     } catch (error) {
-      console.error("Delete product error:", error);
-      throw new ActionError("Failed to delete product");
+      // console.error("Delete product error:", error);
+      throw new ActionError("Falha na exclusão do produto");
     }
   });

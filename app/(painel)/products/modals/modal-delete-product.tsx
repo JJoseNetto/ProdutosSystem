@@ -10,7 +10,6 @@ import {
   addToast,
 } from "@heroui/react";
 import { Product } from "@/types/Product";
-import { useState } from "react";
 import { useAction } from "next-safe-action/hooks";
 import { deleteProduct } from "@/server/actions/products";
 
@@ -29,10 +28,10 @@ export default function ModalDeleteProduct({
 }: ModalDeleteProductProps) {
 
   const { execute, isPending} = useAction(deleteProduct, {
-    onSuccess() {
+    onSuccess(data) {
       addToast({
           title: "Produto deletado!",
-          description: `O produto foi deletado com sucesso.`,
+          description: data.data.message || `O produto foi deletado com sucesso.`,
           color: "success",
         });
       onProductCreated();
