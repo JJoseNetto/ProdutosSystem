@@ -4,15 +4,7 @@ import { useEffect } from "react";
 import { addToast } from "@heroui/react";
 
 export const useProducts = () => {
-  const { execute, result, isPending, status } = useAction(getProducts, {
-    onSuccess() {
-      addToast({
-        title: "Produtos carregados",
-        description: "Produtos encontrados.",
-        variant: "solid",
-        color: "success",
-      });
-    },
+  const { execute, result, isPending } = useAction(getProducts, {
     onError(err) {
       addToast({
         title: "Erro ao carregar produtos",
