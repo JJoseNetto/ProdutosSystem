@@ -168,7 +168,7 @@ export default function ModalProduct({
               <FileInputField
                 id="thumbnail"
                 label="Thumbnail *"
-                error={errors?.thumbnail}
+                error={errors && "thumbnail" in errors ? errors.thumbnail : undefined}
                 fileInputRef={fileInputRef}
                 onChange={handleFileChange}
               />

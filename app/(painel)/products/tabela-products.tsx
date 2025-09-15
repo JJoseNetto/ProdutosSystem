@@ -39,7 +39,7 @@ export default function TabelaProducts() {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [deleteProduct, setDeleteProduct] = useState<Product | null>(null);
 
-  const { products, loading, error, refetch } = useProducts();
+  const { products, loading, refetch } = useProducts();
   const filteredProducts = useProductFilters(products, search, statusFilter);
 
   const handleProductCreated = () => {
@@ -127,7 +127,7 @@ export default function TabelaProducts() {
           <TableBody
             items={filteredProducts}
             loadingState={loading ? "loading" : "idle"}
-            emptyContent={error ? error : "Nenhum produto cadastrado"}
+            emptyContent={"Nenhum produto cadastrado"}
           >
             {(item) => (
               <TableRow key={item.id}>
