@@ -1,4 +1,3 @@
-"use client"
 import { Input, Select, SelectItem } from "@heroui/react";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 

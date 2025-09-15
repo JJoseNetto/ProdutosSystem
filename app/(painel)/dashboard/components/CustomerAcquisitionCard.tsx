@@ -1,6 +1,9 @@
 "use client"
 import { Card, CardHeader, CardBody, CardFooter } from "@/components/ui/card";
+import { Chart as ChartJS, BarElement, CategoryScale,ArcElement, Legend, LinearScale, Title, Tooltip } from "chart.js";
 import { Bar } from 'react-chartjs-2';
+
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement);
 
 const barData = {
   labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'],

@@ -1,51 +1,45 @@
 "use client";
 
 import React from "react";
-import { Button, Input, Checkbox, Link, Form } from "@heroui/react";
+import { Button, Input, Link, Form, addToast } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import NextLink from "next/link";
 import { useRouter } from "next/navigation";
-import { loginUser } from "@/lib/api";
-import { LoginFormData, loginSchema } from "@/lib/validation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useAuthStore } from "@/store/authStore";
 import { UserCircleIcon } from "@heroicons/react/24/solid";
+import { useAction } from "next-safe-action/hooks";
+import { loginUser } from "@/server/actions/auth";
+import { loginSchema, TLoginRequestSchema } from "@/utils/schemas/auth.schema";
 
 export default function Component() {
   const [isVisible, setIsVisible] = React.useState(false);
-  const [isLoading, setIsLoading] = React.useState(false);
-  const [apiError, setApiError] = React.useState("");
   const router = useRouter();
-  const { setToken, setUser } = useAuthStore();
+  const { setUser } = useAuthStore();
 
-  const { register, handleSubmit, formState: { errors } } = useForm<LoginFormData>({
+  const { register, handleSubmit, formState: { errors } } = useForm<TLoginRequestSchema>({
     resolver: zodResolver(loginSchema),
   });
 
   const toggleVisibility = () => setIsVisible(!isVisible);
 
-  const onSubmit = async (data: LoginFormData) => {
-    setIsLoading(true);
-    setApiError("");
+  const { execute, isPending, hasErrored, result } = useAction(loginUser, {
+    onSuccess({ data: { data } }) {
+      router.push('/dashboard');
 
-    try {
-      const response = await loginUser(data);
+      setUser(data.user);
 
-      if (response.token) {
-        setToken(response.token);
-        setUser(response.user);
-
-        router.push("/dashboard");
-      } else {
-        throw new Error("No token received from server");
-      }
-    } catch (err: any) {
-      setApiError(err.message || "An error occurred during login");
-    } finally {
-      setIsLoading(false);
+    },
+    onError(err) {
+      addToast({
+        title: "Something went wrong",
+        description: err.error.thrownError?.message,
+        variant: 'solid',
+        color: 'danger'
+      })
     }
-  };
+  })
 
   return (
     <div className="flex h-full w-full items-center justify-center">
@@ -55,7 +49,7 @@ export default function Component() {
           Connectar-se
         </p>
 
-        <Form className="flex flex-col gap-4" onSubmit={handleSubmit(onSubmit)}>
+        <Form className="flex flex-col gap-4" onSubmit={handleSubmit(execute)}>
           <Input
             label="Email"
             labelPlacement="outside"
@@ -84,12 +78,12 @@ export default function Component() {
             isInvalid={!!errors.password}
             errorMessage={errors.password?.message ? errors.password.message : undefined}
           />
-          <Button className="w-full" color="primary" type="submit" isLoading={isLoading}>
+          <Button className="w-full" color="primary" type="submit" isLoading={isPending}>
             Acessar
           </Button>
         </Form>
 
-        {apiError && <p className="text-red-500 text-sm">{apiError}</p>}
+        {hasErrored && <p className="text-red-500 text-sm">{result.serverError}</p>}
 
         <p className="text-small text-center">
           <Link size="sm" as={NextLink} href="/register">
