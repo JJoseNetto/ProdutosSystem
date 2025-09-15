@@ -10,6 +10,7 @@ import {
   TableCell,
   Chip,
   Tooltip,
+  Pagination,
 } from "@heroui/react";
 import {
   TrashIcon,
@@ -39,12 +40,12 @@ export default function TabelaProducts() {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [deleteProduct, setDeleteProduct] = useState<Product | null>(null);
 
-  const { products, loading, refetch } = useProducts();
+  const { products, loading, refetch, meta, page, setPage, pageSize } = useProducts();
   const filteredProducts = useProductFilters(products, search, statusFilter);
 
-  const handleProductCreated = () => {
-    refetch();
-  };
+  const handleProductCreated = () => refetch({ page, pageSize });
+
+  const totalPages = meta?.totalPages || 1;
 
   const renderCell = useCallback((product: Product, columnKey: string) => {
     const cellValue = (product as any)[columnKey];
@@ -138,6 +139,21 @@ export default function TabelaProducts() {
             )}
           </TableBody>
         </Table>
+
+        <div className="py-2 px-2 flex justify-between items-center overflow-hidden">
+          <span className="text-sm text-default-400">
+            Página {page} de {totalPages}
+          </span>
+          <Pagination
+            isCompact
+            showControls
+            showShadow
+            color="primary"
+            page={page}
+            total={totalPages}
+            onChange={setPage}
+          />
+        </div>
 
         <ModalProduct
           isOpen={isModalOpen || !!editingProduct}

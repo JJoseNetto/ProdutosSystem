@@ -9,10 +9,20 @@ export const getProducts = authActionClient
   .metadata({
     actionName: "getProducts",
   })
+  .inputSchema(
+    z.object({
+      page: z.number().min(0).optional(),
+      pageSize: z.number().min(1).optional(),
+    })
+  )
   .outputSchema(ApiResponseSchema(ProductsResponseSchema))
-  .action(async ({ ctx }) => {
+  .action(async ({ ctx, parsedInput }) => {
     try {
-      const res = await fetch(`${ctx.apiUrl}/products`, {
+      const query = new URLSearchParams();
+      if (parsedInput.page !== undefined) query.append("page", String(parsedInput.page));
+      if (parsedInput.pageSize !== undefined) query.append("pageSize", String(parsedInput.pageSize));
+
+      const res = await fetch(`${ctx.apiUrl}/products?${query.toString()}`, {
         method: "GET",
         headers: ctx.headers,
         credentials: "include",
@@ -24,6 +34,7 @@ export const getProducts = authActionClient
       }
 
       const data = (await res.json()) as TProductsResponseSchema;
+      console.log("Fetched products:", data);
 
       return {
         success: true,
@@ -31,10 +42,11 @@ export const getProducts = authActionClient
         message: "Products fetched successfully",
       };
     } catch (error) {
-      // console.error("Get products error:", error);
+      console.error("Get products error:", error);
       throw new ActionError("Failed to fetch products");
     }
   });
+
 
 export const createProduct = authActionClient
   .metadata({

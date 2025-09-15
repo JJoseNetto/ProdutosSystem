@@ -1,9 +1,11 @@
 import { getProducts } from "@/server/actions/products";
 import { useAction } from "next-safe-action/hooks";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { addToast } from "@heroui/react";
 
-export const useProducts = () => {
+export const useProducts = (initialPage = 1, pageSize = 10) => {
+  const [page, setPage] = useState(initialPage);
+
   const { execute, result, isPending } = useAction(getProducts, {
     onError(err) {
       addToast({
@@ -16,16 +18,20 @@ export const useProducts = () => {
   });
 
   useEffect(() => {
-    execute();
-  }, []);
+    execute({ page, pageSize });
+  }, [page, pageSize]);
 
   const products = result.data?.success ? result.data.data.data : [];
   const loading = isPending;
+  const meta = result.data?.success ? result.data.data.meta : null;
 
   return {
     products,
     loading,
     refetch: execute,
-    meta: result.data?.success ? result.data.data.meta : null,
+    meta,
+    page,
+    setPage,
+    pageSize,
   };
 };
