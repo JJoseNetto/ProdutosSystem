@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import React, { useState, useCallback } from "react";
 import {
@@ -10,18 +10,18 @@ import {
   TableCell,
   Chip,
   Tooltip,
+  Pagination,
 } from "@heroui/react";
 import {
   TrashIcon,
   PencilSquareIcon,
 } from "@heroicons/react/24/outline";
 
-import { useProducts } from "@/app/products/hooks/useProducts";
-import { useProductFilters } from "@/app/products/hooks/useProductFilters";
-import { ProductTableHeader } from "@/app/products/components/product-table-header";
-import { ProductTableFilters } from "@/app/products/components/product-table-filters";
-import ModalProduct from "./modals/modal-create-product";
-import ModalEditProduct from "./modals/modal-edit-product";
+import { useProducts } from "@/app/(painel)/products/hooks/useProducts";
+import { useProductFilters } from "@/app/(painel)/products/hooks/useProductFilters";
+import { ProductTableHeader } from "@/app/(painel)/products/components/product-table-header";
+import { ProductTableFilters } from "@/app/(painel)/products/components/product-table-filters";
+import ModalProduct from "./modals/modal-product";
 import { Product } from "@/types/Product";
 import ModalDeleteProduct from "./modals/modal-delete-product";
 
@@ -35,16 +35,17 @@ export const columns = [
 export default function TabelaProducts() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [deleteProduct, setDeleteProduct] = useState<Product | null>(null);
 
-  const { products, loading, error, refetch } = useProducts();
+  const { products, loading, refetch, meta, page, setPage, pageSize } = useProducts();
   const filteredProducts = useProductFilters(products, search, statusFilter);
 
-  const handleProductCreated = () => {
-    refetch();
-  };
+  const handleProductCreated = () => refetch({ page, pageSize });
+
+  const totalPages = meta?.totalPages || 1;
 
   const renderCell = useCallback((product: Product, columnKey: string) => {
     const cellValue = (product as any)[columnKey];
@@ -69,16 +70,22 @@ export default function TabelaProducts() {
         return (
           <div className="flex items-center justify-center gap-2">
             <Tooltip content="Editar">
-              <span 
+              <span
                 className="cursor-pointer"
-                onClick={() => setEditingProduct(product)}
+                onClick={() => {
+                  setEditingProduct(product);
+                  setIsModalOpen(true);
+                }}
               >
                 <PencilSquareIcon className="w-4 h-4 text-zinc-500" />
               </span>
             </Tooltip>
             <Tooltip color="danger" content="Excluir">
               <span className="cursor-pointer">
-                <TrashIcon onClick={() => setDeleteProduct(product)} className="w-4 h-4 text-red-500" />
+                <TrashIcon
+                  onClick={() => setDeleteProduct(product)}
+                  className="w-4 h-4 text-red-500"
+                />
               </span>
             </Tooltip>
           </div>
@@ -118,30 +125,45 @@ export default function TabelaProducts() {
             )}
           </TableHeader>
 
-          <TableBody 
-            items={filteredProducts} 
+          <TableBody
+            items={filteredProducts}
             loadingState={loading ? "loading" : "idle"}
-            emptyContent={error ? error : "Nenhum produto cadastrado"}
+            emptyContent={"Nenhum produto cadastrado"}
           >
             {(item) => (
               <TableRow key={item.id}>
-                {(columnKey) => <TableCell>{renderCell(item, columnKey as string)}</TableCell>}
+                {(columnKey) => (
+                  <TableCell>{renderCell(item, columnKey as string)}</TableCell>
+                )}
               </TableRow>
             )}
           </TableBody>
         </Table>
 
-        <ModalProduct
-          isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
-          onProductCreated={handleProductCreated}
-        />
+        <div className="py-2 px-2 flex justify-between items-center overflow-hidden">
+          <span className="text-sm text-default-400">
+            Página {page} de {totalPages}
+          </span>
+          <Pagination
+            isCompact
+            showControls
+            showShadow
+            color="primary"
+            page={page}
+            total={totalPages}
+            onChange={setPage}
+          />
+        </div>
 
-        <ModalEditProduct
-          isOpen={!!editingProduct}
-          onClose={() => setEditingProduct(null)}
+        <ModalProduct
+          isOpen={isModalOpen || !!editingProduct}
+          onClose={() => {
+            setIsModalOpen(false);
+            setEditingProduct(null);
+          }}
           onProductCreated={handleProductCreated}
           product={editingProduct}
+          mode={editingProduct ? "edit" : "create"}
         />
 
         <ModalDeleteProduct

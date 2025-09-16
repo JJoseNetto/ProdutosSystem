@@ -8,6 +8,7 @@ Um **projeto frontend** feito com **Next.js** e **HeroUI**, que inclui:
 * Dados mockados para demonstração 📝
 * Gerenciamento de estado com **Zustand** 🏗️
 * Validação de formulários com **Zod** ✅
+* Ações seguras com **Next Safe Actions** 🔒
 * Ícones com **Heroicons** ✨
 
 Este projeto foi desenvolvido com foco em **boa arquitetura, design moderno e usabilidade**.
@@ -23,6 +24,7 @@ Este projeto foi desenvolvido com foco em **boa arquitetura, design moderno e us
 * [Chart.js](https://www.chartjs.org/)
 * [Zustand](https://zustand-demo.pmnd.rs/)
 * [Zod](https://zod.dev/)
+* [Next Safe Actions](https://next-safe-action.dev/)
 * CSS moderno com Tailwind (via HeroUI)
 
 ---
@@ -35,6 +37,7 @@ Este projeto foi desenvolvido com foco em **boa arquitetura, design moderno e us
 * ✅ Visualização de gráficos com dados mockados
 * ✅ Uso de Zustand para gerenciamento global de estado
 * ✅ Layout moderno e responsivo
+* ✅ Ações seguras com Next Safe Actions (tipadas e com tratamento de erros)
 
 ---
 
@@ -76,12 +79,13 @@ Acesse o projeto em [http://localhost:3000](http://localhost:3000) 🌐
 ## 🏗️ Estrutura do projeto
 
 ```
-├─ /components      # Componentes reutilizáveis (inputs, buttons, forms)
-├─ /pages           # Páginas do Next.js
-├─ /lib             # Funções utilitárias e chamadas de API
-├─ /store           # Estado global com Zustand
-├─ /public          # Arquivos estáticos (imagens, ícones)
-├─ /styles          # Estilos globais
+├─ /components # Componentes reutilizáveis (inputs, buttons, forms)
+├─ /pages # Páginas do Next.js
+├─ /store # Estado global com Zustand
+├─ /server # Server Actions (Next Safe Actions) 
+├─ /utils # Schema e tratamento de erro
+├─ /public # Arquivos estáticos (imagens, ícones)
+├─ /styles # Estilos globais
 ```
 
 ---

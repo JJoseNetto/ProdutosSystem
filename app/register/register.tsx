@@ -1,54 +1,43 @@
 "use client";
 
 import React from "react";
-import {Button, Input, Link} from "@heroui/react";
+import {addToast, Button, Input, Link} from "@heroui/react";
 import {Icon} from "@iconify/react";
 import NextLink from "next/link";
 import { useRouter } from "next/navigation";
-import { registerUser } from "@/lib/api";
-import { RegisterSchema, RegisterFormData } from "@/lib/validation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { useAuthStore } from "@/store/authStore";
 import { UserCircleIcon } from "@heroicons/react/24/solid";
+import { RegisterSchema, TRegisterRequestSchema } from "@/utils/schemas/auth.schema";
+import { useAction } from "next-safe-action/hooks";
+import { registerUser } from "@/server/actions/auth";
 
 export default function Register() {
   const [isVisible, setIsVisible] = React.useState(false);
   const [isConfirmVisible, setIsConfirmVisible] = React.useState(false);
-  const [isLoading, setIsLoading] = React.useState(false);
-  const [error, setError] = React.useState("");
+  const [error] = React.useState("");
   const router = useRouter();
-  const { setToken, setUser } = useAuthStore();
 
-  const { register, handleSubmit, formState: { errors } } = useForm<RegisterFormData>({
+  const { register, handleSubmit, formState: { errors } } = useForm<TRegisterRequestSchema>({
     resolver: zodResolver(RegisterSchema),
   });
 
   const toggleVisibility = () => setIsVisible(!isVisible);
   const toggleConfirmVisibility = () => setIsConfirmVisible(!isConfirmVisible);
-
-  const onSubmit = async (data: RegisterFormData) => {
-    setIsLoading(true);
-    setError("");
-    
-    try {
-      const response = await registerUser(data);
-      
-      if (response.token) {
-        setToken(response.token);
-        setUser(response.user);
-        
-        router.push("/dashboard");
-      } else {
-        throw new Error("No token received from server");
-      }
-    } catch (err: any) {
-      setError(err.message || "An error occurred during registration");
-    } finally {
-      setIsLoading(false);
+  
+  const { execute, isPending } = useAction(registerUser, {
+    onSuccess() {
+      router.push('/');
+    },
+    onError(err) {
+      addToast({
+        title: "Something went wrong",
+        description: err.error.thrownError?.message,
+        variant: 'solid',
+        color: 'danger'
+      })
     }
-  };
-
+  })
 
   return (
     <div className="flex h-full w-full items-center justify-center">
@@ -64,7 +53,7 @@ export default function Register() {
           </div>
         )}
         
-        <form className="flex flex-col gap-4" onSubmit={handleSubmit(onSubmit)}>
+        <form className="flex flex-col gap-4" onSubmit={handleSubmit(execute)}>
           <Input
             label="Nome Completo"
             labelPlacement="outside"
@@ -171,10 +160,10 @@ export default function Register() {
           <Button 
             color="primary" 
             type="submit"
-            isLoading={isLoading}
-            disabled={isLoading}
+            isLoading={isPending}
+            disabled={isPending}
           >
-            {isLoading ? "Cadastrando..." : "Cadastrar"}
+            {isPending ? "Cadastrando..." : "Cadastrar"}
           </Button>
         </form>
         

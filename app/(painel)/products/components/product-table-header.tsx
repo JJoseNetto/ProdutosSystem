@@ -1,5 +1,3 @@
-"use client"
-
 import { Divider, Button } from "@heroui/react";
 import { PlusCircleIcon } from "@heroicons/react/24/outline";
 
