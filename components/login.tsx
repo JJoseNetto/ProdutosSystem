@@ -13,7 +13,7 @@ import { useAction } from "next-safe-action/hooks";
 import { loginUser } from "@/server/actions/auth";
 import { loginSchema, TLoginRequestSchema } from "@/utils/schemas/auth.schema";
 
-export default function Component() {
+export default function Login() {
   const [isVisible, setIsVisible] = React.useState(false);
   const router = useRouter();
   const { setUser } = useAuthStore();
