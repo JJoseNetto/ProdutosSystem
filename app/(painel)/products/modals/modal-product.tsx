@@ -50,10 +50,10 @@ export default function ModalProduct({
   } = useProductForm(mode);
 
   const { execute: executeCreate} = useAction(createProduct, {
-    onSuccess({data: {data: mensagem}}) {
+    onSuccess(data) {
         addToast({
           title: "Produto criado!",
-          description: mensagem || `O produto foi criado com sucesso.`,
+          description: data.data.data.mensagem || `O produto foi criado com sucesso.`,
           color: "success",
         });
         onProductCreated();
@@ -70,10 +70,10 @@ export default function ModalProduct({
   });
 
   const { execute: executeEdit} = useAction(editProduct, {
-    onSuccess({data: {data: mensagem}}) {
+    onSuccess(data) {
         addToast({
           title: "Produto editado!",
-          description: mensagem || `O produto foi editado com sucesso.`,
+          description: data.data.data.mensagem || `O produto foi editado com sucesso.`,
           color: "success",
         });
         onProductCreated();
